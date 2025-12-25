@@ -1,0 +1,12 @@
+﻿id,name,district,coordinates,category,tags,price_level,best_time,description,local_tip,transport
+ayld001,Kingswood Richly Plaza,Yuen Long,"22.452153, 114.000390",Food & Drink,,<100,,,,"Bus, Light Rail"
+ayld002,Ha Pak Nai,Yuen Long,"22.4267459, 113.9430758",Nature & Scenary,"Romantic, Insta-Worthy, Scenic, Local Favorites",Free,Sunset,,,Minibus
+ayld003,Lau Fau Shan,Yuen Long,"22.4673801, 113.9841334",Food & Drink,"Hidden, Chill",100-500,,,,Bus
+ayld004,Nam Sang Wai Cable Ferry,Yuen Long,"22.453904, 114.034803",Recreation & Activities,"Tourist Friendly, Chill, Local Favorites, Hidden",<100,,"The only manual ferry in hong kong, recommended for cyclists",,Minibus
+ayld005,Tai Tong Country Park,Yuen Long,"22.40922, 114.03178",Nature & Scenary,"Tourist Friendly, Hiking",Free,,,,Bus
+ayld006,Hong Kong Wetland Park,Yuen Long,"22.468094, 114.004183",Nature & Scenary,,<100,,,,"Bus, Light Rail"
+ayld007,Tin Sau Bazaar,Yuen Long,"22.465715, 114.000768",Heritage & Culture,,<100,,,,"Bus, Light Rail"
+atmd001,Ho Wo Street,Tuen Mun,"22.357358, 113.953006",Nature & Scenary,,Free,,,,Bus
+atmd002,T·PARK,Tuen Mun,"22.422296, 113.924178",Urban & Architecture,,Free,,,,Bus
+atmd003,Hong Kong Golden Beach,Tuen Mun,"22.371299, 113.988551",Recreation & Activities,,Free,,,,Bus
+atmd004,Reservoir Islands Viewpoint,Tuen Mun,"22.390823, 114.024112",Nature & Scenary,Hiking,Free,,,,Walk
