@@ -6,16 +6,12 @@ from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 from src.config import OLLAMA_HOST, DEFAULT_MODEL
 
-def get_rag_response(query: str, retriever):
+def get_rag_response(query: str, retriever, prompt_template_file:str="src/prompt_template.txt"):
     llm = ChatOllama(model=DEFAULT_MODEL, base_url=OLLAMA_HOST, temperature=1.0)
 
     # Template to guide LLM
-    prompt_template = ChatPromptTemplate.from_template(
-        '''Use only the following context to answer:
-        {context}
-        Question: {question}
-        Answer:'''
-        )
+    with open(prompt_template_file, 'r') as f:
+        prompt_template = ChatPromptTemplate.from_template(f.read())
     
     # Retrieve relevant documents
     docs = retriever.invoke(query)
