@@ -210,3 +210,4 @@ __marimo__/
 backend/db/
 .python-version
 *.kcmark
+~$*
