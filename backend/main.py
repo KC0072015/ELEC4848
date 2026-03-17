@@ -14,7 +14,8 @@ from src.chat_history import ChatHistory
 
 # 1. Setup/Load Database
 # Run ingestion once, then comment it out if your CSV hasn't changed
-# ingest_data("./data/attractions.csv", db_path="./db/chroma") 
+if "-i" in sys.argv:
+    ingest_data("./data/attractions.csv", db_path="./db/chroma") 
 
 db = Chroma(persist_directory="./db/chroma", embedding_function=get_embedding_func())
 retriever = db.as_retriever(search_kwargs={"k": 2}) # Top 2 relevant rows
