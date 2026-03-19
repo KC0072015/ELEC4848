@@ -11,7 +11,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from tkinter.scrolledtext import ScrolledText
 
-from backend.tools.src.review_processor import process_attraction_reviews
+from src.review_processor import process_attraction_reviews
 
 
 class ReviewProcessorUI:
