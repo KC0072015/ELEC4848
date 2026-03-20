@@ -31,6 +31,13 @@ elif query.lower() == "/bye":
 while query: 
     retrieval_stats = measure_retrieval(retriever, query)
 
+    #DBG: Print retrieved docs
+    docs = retriever.invoke(query)
+    print(f"\n=== Retrieved {len(docs)} docs ===")
+    for doc in docs:
+        print(doc.page_content[:300])
+        print("---")
+
     print(f"Query: {query}\nResponse:")
     start = time.perf_counter()
     collected = []
