@@ -29,13 +29,23 @@ def ingest_data(file_path: str, db_path="./db/chroma") -> None:
                 skipped += 1
                 continue
 
+            lat, lng = None, None
+            raw_coords = row.get("coordinates", "").strip()
+            if raw_coords:
+                try:
+                    lat, lng = [float(x.strip()) for x in raw_coords.split(",")]
+                except ValueError:
+                    pass
+
             docs.append(Document(
                 page_content=_row_to_text(row),
                 metadata={
                     "id": row.get("id", ""),
                     "name": row.get("name", ""),
                     "district": row.get("district", ""),
-                    "coordinates": row.get("coordinates", ""),
+                    "coordinates": raw_coords,
+                    "lat": lat,
+                    "lng": lng,
                 }
             ))
 

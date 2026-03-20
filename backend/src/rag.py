@@ -12,9 +12,9 @@ def get_rag_response(query: str, retriever, prompt_template_file: str = "src/pro
     llm = ChatOllama(model=DEFAULT_MODEL, base_url=OLLAMA_HOST, temperature=0.5)
 
     # Template to guide LLM
-    with open(prompt_template_file, 'r') as f:
+    with open(prompt_template_file, 'r', encoding='utf-8') as f:
         prompt_template = ChatPromptTemplate.from_template(f.read())
-    
+
     # Retrieve relevant documents
     docs = retriever.invoke(query)
     context = "\n".join([doc.page_content for doc in docs])
@@ -33,16 +33,23 @@ def stream_rag_response(
     retriever,
     prompt_template_file: str = "src/prompt_template.txt",
     history: Optional[str] = None,
+    extra_context: Optional[str] = None,
 ) -> Generator[str, None, None]:
-    """Stream the RAG response token-by-token."""
+    """Stream the RAG response token-by-token.
+
+    extra_context: optional proximity note prepended to the retrieved context,
+                   used when no attractions are found within the distance threshold.
+    """
 
     llm = ChatOllama(model=DEFAULT_MODEL, base_url=OLLAMA_HOST, temperature=0.5)
 
-    with open(prompt_template_file, 'r') as f:
+    with open(prompt_template_file, 'r', encoding='utf-8') as f:
         prompt_template = ChatPromptTemplate.from_template(f.read())
 
     docs = retriever.invoke(query)
     context = "\n".join([doc.page_content for doc in docs])
+    if extra_context:
+        context = extra_context + "\n\n" + context
 
     chain = prompt_template | llm
     for chunk in chain.stream({

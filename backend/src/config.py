@@ -15,5 +15,6 @@ LLM_D = "huggingface.co/google/gemma-3-4b-it-qat-q4_0-gguf:latest"
 LLM_E = "huggingface.co/lmstudio-community/gemma-3-4b-it-GGUF:Q4_K_M"
 
 DEFAULT_MODEL = LLM_E
+CLASSIFIER_MODEL = LLM_A  # lightweight model used for intent classification
 # Embedding Model
 EMBEDDING_MODEL = "mxbai-embed-large"
