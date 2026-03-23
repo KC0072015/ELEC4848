@@ -1,0 +1,18 @@
+Case B boundary — should return suggestions ONLY, no itinerary:
+"I love street food. Where should I go in Hong Kong?"
+"What are the best rooftop views in the city?"
+"Suggest some hidden gems for a solo traveler."
+"I'm into architecture. What spots are worth visiting?"
+"Any good spots for watching the sunset?"
+"What are some must-see attractions in Kowloon?"
+
+Case C — should generate an itinerary:
+"Make me a 1-day itinerary focused on street food."
+"Plan a 2-day trip for a couple who loves nature."
+"Create a schedule for my first day in Hong Kong."
+"Build me a full day plan around Kowloon."
+
+Ambiguous — good for stress-testing the classifier:
+"I have one day, what should I do?" (no explicit "plan" keyword — should be B)
+"Give me a full day of things to do for a foodie." (borderline — watch if it goes C)
+"What would you recommend for a 3-day trip?" (asks for recommendations, not a plan — should be B)
