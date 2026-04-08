@@ -177,7 +177,7 @@ def chat(req: ChatRequest):
             for token in stream_rag_response(
                 query,
                 retriever,
-                history=history.format_for_prompt(),
+                history=history.turns,
                 extra_context=extra_context,
             ):
                 collected.append(token)

@@ -18,6 +18,29 @@ PROXIMITY_THRESHOLD_KM = 3.0
 ATTRACTIONS_CSV = "./data/attractions.csv"
 PLACE_NAMES_CSV = "./data/place_names.csv"
 
+DISTRICTS = [
+    "Central & Western", "Eastern", "Southern", "Wan Chai",
+    "Kowloon City", "Kwun Tong", "Sham Shui Po", "Wong Tai Sin",
+    "Yau Tsim Mong", "Islands", "Kwai Tsing", "North", "Sai Kung",
+    "Sha Tin", "Tai Po", "Tsuen Wan", "Tuen Mun", "Yuen Long"
+]
+
+def extract_district(query: str, history: ChatHistory) -> str | None:
+    search_text = query
+    if history.turns:
+        search_text += " " + history.turns[-1][0]
+    for district in DISTRICTS:
+        if district.lower() in search_text.lower():
+            return district
+    return None
+
+def build_retrieval_query(query: str, history: ChatHistory) -> str:
+    if not history.turns:
+        return query
+    last_user = history.turns[-1][0]
+    last_assistant = history.turns[-1][1][:300]
+    return f"{last_user} {last_assistant} {query}"
+
 # 1. Setup/Load Database
 # Run ingestion once, then comment it out if your CSV hasn't changed
 if "-i" in sys.argv:
@@ -65,28 +88,44 @@ while query:
                 f"and suggest one attraction from the Context below that best matches their preferences."
             )
 
-    retrieval_stats = measure_retrieval(retriever, query)
+    retrieval_query = build_retrieval_query(query, history)
+    district = extract_district(query, history)
+    if district:
+        district_retriever = db.as_retriever(
+            search_type="mmr",
+            search_kwargs={"k": 6, "fetch_k": 20, "lambda_mult": 0.7, "filter": {"district": district}}
+        )
+        docs = district_retriever.invoke(retrieval_query)
+        if len(docs) >= 2:
+            retriever = district_retriever
+        # else: fall through to base_retriever with enriched query
+        # (prompt's district rules will handle the warning to user)
 
-    #DBG: Print retrieved docs
-    docs = retriever.invoke(query)
+    retrieval_stats = measure_retrieval(retriever, retrieval_query)
+    docs = retriever.invoke(retrieval_query)
     
 
     print(f"Query: {query}\nResponse:")
     start = time.perf_counter()
     collected = []
-    for token in stream_rag_response(query, retriever, history=history.format_for_prompt(), extra_context=extra_context):
+    for token in stream_rag_response(retrieval_query, retriever, history=history.turns, extra_context=extra_context):
         print(token, end="", flush=True)
         collected.append(token)
     print("\n")
     duration = time.perf_counter() - start
-    print_retrieval_stats(retrieval_stats)
-    print("--- Stats ---")
-    print(f"Wall time:        {duration:.3f} s")
-    print(f"\n=== Retrieved {len(docs)} docs ===")
-    for doc in docs:
-        print(doc.page_content[:doc.page_content.find("\n")]) # Print only the first line of each retrieved doc
-        print("---")
-    history.add_turn(query, "".join(collected))
+    
+    # print_retrieval_stats(retrieval_stats)
+
+
+    # print("--- Stats ---")
+    # print(f"Wall time:        {duration:.3f} s")
+
+
+    # print(f"\n=== Retrieved {len(docs)} docs ===")
+    # for doc in docs:
+    #     print(doc.page_content[:doc.page_content.find("\n")]) # Print only the first line of each retrieved doc
+    #     print("---")
+    # history.add_turn(query, "".join(collected))
 
     query = input("Please enter your query (or /bye to exit): ")
     if not query:

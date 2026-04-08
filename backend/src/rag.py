@@ -2,61 +2,73 @@
 src/rag.py: Module for handling retrieval-augmented generation (RAG) processes.
 '''
 
-from typing import Generator, Optional
+from typing import Generator, List, Optional, Tuple
 
 from langchain_ollama import ChatOllama
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from src.config import OLLAMA_HOST, DEFAULT_MODEL
 
-def get_rag_response(query: str, retriever, prompt_template_file: str = "src/prompt_template.txt", history: Optional[str] = None):
-    llm = ChatOllama(model=DEFAULT_MODEL, base_url=OLLAMA_HOST, temperature=0.5)
 
-    # Template to guide LLM
-    with open(prompt_template_file, 'r', encoding='utf-8') as f:
-        prompt_template = ChatPromptTemplate.from_template(f.read())
+def _build_messages(
+    system_prompt: str,
+    context: str,
+    query: str,
+    history: Optional[List[Tuple[str, str]]],
+) -> list:
+    """
+    Build a proper chat message list:
+      SystemMessage  — Hana's instructions (no placeholders)
+      HumanMessage   — each user turn from history
+      AIMessage      — each assistant turn from history
+      HumanMessage   — current context + question (final turn)
+    """
+    messages: list = [SystemMessage(content=system_prompt)]
+    for user_msg, ai_msg in (history or []):
+        messages.append(HumanMessage(content=user_msg))
+        messages.append(AIMessage(content=ai_msg))
+    messages.append(HumanMessage(content=f"## Context\n{context}\n\n## Question\n{query}"))
+    return messages
 
-    # Retrieve relevant documents
+
+def get_rag_response(
+    query: str,
+    retriever,
+    prompt_template_file: str = "src/prompt_template.txt",
+    history: Optional[List[Tuple[str, str]]] = None,
+):
+    llm = ChatOllama(model=DEFAULT_MODEL, base_url=OLLAMA_HOST, temperature=0.2)
+
+    with open(prompt_template_file, "r", encoding="utf-8") as f:
+        system_prompt = f.read()
+
     docs = retriever.invoke(query)
     context = "\n".join([doc.page_content for doc in docs])
 
-    # Combine context with prompt and call LLM
-    chain = prompt_template | llm
-    return chain.invoke({
-        "context": context,
-        "question": query,
-        "history": history or "None"
-    })
+    messages = _build_messages(system_prompt, context, query, history)
+    return llm.invoke(messages)
 
 
 def stream_rag_response(
     query: str,
     retriever,
     prompt_template_file: str = "src/prompt_template.txt",
-    history: Optional[str] = None,
+    history: Optional[List[Tuple[str, str]]] = None,
     extra_context: Optional[str] = None,
 ) -> Generator[str, None, None]:
-    """Stream the RAG response token-by-token.
+    """Stream the RAG response token-by-token."""
 
-    extra_context: optional proximity note prepended to the retrieved context,
-                   used when no attractions are found within the distance threshold.
-    """
+    llm = ChatOllama(model=DEFAULT_MODEL, base_url=OLLAMA_HOST, temperature=0.2)
 
-    llm = ChatOllama(model=DEFAULT_MODEL, base_url=OLLAMA_HOST, temperature=0.5)
-
-    with open(prompt_template_file, 'r', encoding='utf-8') as f:
-        prompt_template = ChatPromptTemplate.from_template(f.read())
+    with open(prompt_template_file, "r", encoding="utf-8") as f:
+        system_prompt = f.read()
 
     docs = retriever.invoke(query)
     context = "\n".join([doc.page_content for doc in docs])
     if extra_context:
         context = extra_context + "\n\n" + context
 
-    chain = prompt_template | llm
-    for chunk in chain.stream({
-        "context": context,
-        "question": query,
-        "history": history or "None"
-    }):
+    messages = _build_messages(system_prompt, context, query, history)
+    for chunk in llm.stream(messages):
         content = getattr(chunk, "content", None)
         if content:
             yield content
