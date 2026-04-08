@@ -212,3 +212,4 @@ backend/db/
 .python-version
 *.kcmark
 ~$*
+*_results.*
