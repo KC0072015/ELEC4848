@@ -38,6 +38,31 @@ ATTRACTIONS_CSV = "./data/attractions.csv"
 PLACE_NAMES_CSV = "./data/place_names.csv"
 DB_PATH = "./db/chroma"
 
+DISTRICTS = [
+    "Central & Western", "Eastern", "Southern", "Wan Chai",
+    "Kowloon City", "Kwun Tong", "Sham Shui Po", "Wong Tai Sin",
+    "Yau Tsim Mong", "Islands", "Kwai Tsing", "North", "Sai Kung",
+    "Sha Tin", "Tai Po", "Tsuen Wan", "Tuen Mun", "Yuen Long"
+]
+
+
+def extract_district(query: str, history: ChatHistory) -> str | None:
+    search_text = query
+    if history.turns:
+        search_text += " " + history.turns[-1][0]
+    for district in DISTRICTS:
+        if district.lower() in search_text.lower():
+            return district
+    return None
+
+
+def build_retrieval_query(query: str, history: ChatHistory) -> str:
+    if not history.turns:
+        return query
+    last_user = history.turns[-1][0]
+    last_assistant = history.turns[-1][1][:300]
+    return f"{last_user} {last_assistant} {query}"
+
 # ---------------------------------------------------------------------------
 # App
 # ---------------------------------------------------------------------------
@@ -163,6 +188,17 @@ def chat(req: ChatRequest):
                 f"and suggest one attraction from the Context below that best matches their preferences."
             )
 
+    retrieval_query = build_retrieval_query(query, history)
+    district = extract_district(query, history)
+    if district:
+        district_retriever = db.as_retriever(
+            search_type="mmr",
+            search_kwargs={"k": 6, "fetch_k": 20, "lambda_mult": 0.7, "filter": {"district": district}},
+        )
+        docs = district_retriever.invoke(retrieval_query)
+        if len(docs) >= 2:
+            retriever = district_retriever
+
     def event_stream():
         # 1. Session id
         yield f"event: session\ndata: {session_id}\n\n"
@@ -179,6 +215,7 @@ def chat(req: ChatRequest):
                 retriever,
                 history=history.turns,
                 extra_context=extra_context,
+                retrieval_query=retrieval_query,
             ):
                 collected.append(token)
                 # Newlines inside SSE data fields must be escaped

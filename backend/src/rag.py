@@ -35,13 +35,14 @@ def get_rag_response(
     retriever,
     prompt_template_file: str = "src/prompt_template.txt",
     history: Optional[List[Tuple[str, str]]] = None,
+    retrieval_query: Optional[str] = None,
 ):
     llm = ChatOllama(model=DEFAULT_MODEL, base_url=OLLAMA_HOST, temperature=0.2)
 
     with open(prompt_template_file, "r", encoding="utf-8") as f:
         system_prompt = f.read()
 
-    docs = retriever.invoke(query)
+    docs = retriever.invoke(retrieval_query or query)
     context = "\n".join([doc.page_content for doc in docs])
 
     messages = _build_messages(system_prompt, context, query, history)
@@ -54,6 +55,7 @@ def stream_rag_response(
     prompt_template_file: str = "src/prompt_template.txt",
     history: Optional[List[Tuple[str, str]]] = None,
     extra_context: Optional[str] = None,
+    retrieval_query: Optional[str] = None,
 ) -> Generator[str, None, None]:
     """Stream the RAG response token-by-token."""
 
@@ -62,7 +64,7 @@ def stream_rag_response(
     with open(prompt_template_file, "r", encoding="utf-8") as f:
         system_prompt = f.read()
 
-    docs = retriever.invoke(query)
+    docs = retriever.invoke(retrieval_query or query)
     context = "\n".join([doc.page_content for doc in docs])
     if extra_context:
         context = extra_context + "\n\n" + context

@@ -53,13 +53,12 @@
           "id": "S1-Q4",
           "category": "basic_factual",
           "query": "How do I get to Tai Kwun by MTR?",
-          "expected_behavior": "Reference Central district location. May mention walking from Central station. Should not invent specific MTR exit numbers not present in context.",
-          "should_refuse": false,
-          "should_use_context": true,
-          "expected_keywords": ["Central"],
+          "expected_behavior": "No explicit transport route is available for Tai Kwun in context, so the assistant should refuse directions and suggest looking up Google Maps or the MTR website.",
+          "should_refuse": true,
+          "should_use_context": false,
+          "expected_keywords": ["exact directions", "Google Maps", "MTR website"],
           "hallucination_check": true,
-          "memory_dependency": "S1-Q2",
-          "notes": "Transport follow-up. Watch for hallucinated MTR exit numbers."
+          "notes": "Transport follow-up with missing route data; refusal is the intended behavior."
         }
       ]
     },

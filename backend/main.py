@@ -108,12 +108,18 @@ while query:
     print(f"Query: {query}\nResponse:")
     start = time.perf_counter()
     collected = []
-    for token in stream_rag_response(retrieval_query, retriever, history=history.turns, extra_context=extra_context):
+    for token in stream_rag_response(
+        query,
+        retriever,
+        history=history.turns,
+        extra_context=extra_context,
+        retrieval_query=retrieval_query,
+    ):
         print(token, end="", flush=True)
         collected.append(token)
     print("\n")
     duration = time.perf_counter() - start
-    
+
     # print_retrieval_stats(retrieval_stats)
 
 
@@ -125,7 +131,7 @@ while query:
     # for doc in docs:
     #     print(doc.page_content[:doc.page_content.find("\n")]) # Print only the first line of each retrieved doc
     #     print("---")
-    # history.add_turn(query, "".join(collected))
+    history.add_turn(query, "".join(collected))
 
     query = input("Please enter your query (or /bye to exit): ")
     if not query:
