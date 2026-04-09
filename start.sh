@@ -16,7 +16,7 @@ cd "$ROOT/backend"
 "$VENV/bin/uvicorn" api:app --reload --port 8000 &
 API_PID=$!
 
-echo "Starting Frontend on http://localhost:5173 ..."
+echo "Starting Frontend on http://localhost:8080 ..."
 cd "$ROOT/frontend"
 npm run dev &
 FRONTEND_PID=$!

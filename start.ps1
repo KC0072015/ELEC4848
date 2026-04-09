@@ -13,7 +13,7 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command",
     "Set-Location '$Root\backend'; & '$Uvicorn' api:app --reload --port 8000" `
     -WindowStyle Normal
 
-Write-Host "Starting Frontend on http://localhost:5173 ..."
+Write-Host "Starting Frontend on http://localhost:8080 ..."
 Start-Process powershell -ArgumentList "-NoExit", "-Command",
     "Set-Location '$Root\frontend'; npm run dev" `
     -WindowStyle Normal
