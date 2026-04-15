@@ -13,6 +13,8 @@ LLM_B = "hf.co/unsloth/gemma-3-4b-it-GGUF:Q8_0"
 LLM_C = "hf.co/unsloth/gemma-3-270m-it-GGUF:Q8_0"
 LLM_D = "huggingface.co/google/gemma-3-4b-it-qat-q4_0-gguf:latest"
 LLM_E = "huggingface.co/lmstudio-community/gemma-3-4b-it-GGUF:Q4_K_M"
+LLM_F = "gemma4:e4b-it-q4_K_M"
+LLM_G = "gemma4:26b"
 
 DEFAULT_MODEL = LLM_E
 CLASSIFIER_MODEL = LLM_A  # lightweight model used for intent classification

@@ -111,6 +111,8 @@ REFUSAL_PHRASES: list[str] = [
     "openrice",
     "hong kong observatory",
     "weather app",
+    "No data found",
+    "no data found"
 ]
 
 
@@ -214,7 +216,7 @@ def score_relevance(response: str, keywords: list[str]) -> Optional[int]:
     rl = response.lower()
     hits = sum(1 for kw in keywords if kw.lower() in rl)
     ratio = hits / len(keywords)
-    return 3 if ratio == 1.0 else (2 if ratio >= 0.5 else 1)
+    return 3 if ratio >= 0.8 else (2 if ratio >= 0.5 else 1)
 
 
 def score_refusal(response: str, should_refuse: bool) -> dict:

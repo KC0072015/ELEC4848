@@ -7,6 +7,7 @@ from src.ingestion import ingest_data
 from src.performance_measure import (
     measure_retrieval,
     print_retrieval_stats,
+    get_gpu_usage,  # PERF
 )
 from src.rag import stream_rag_response
 from src.embedding import get_embedding_func
@@ -106,6 +107,7 @@ while query:
     
 
     print(f"Query: {query}\nResponse:")
+    vram_before, vram_total = get_gpu_usage()  # PERF
     start = time.perf_counter()
     collected = []
     for token in stream_rag_response(
@@ -120,11 +122,15 @@ while query:
     print("\n")
     duration = time.perf_counter() - start
 
-    # print_retrieval_stats(retrieval_stats)
-
-
-    # print("--- Stats ---")
-    # print(f"Wall time:        {duration:.3f} s")
+    # PERF ---------------------------------------------------------------
+    vram_after, _ = get_gpu_usage()
+    tok_per_s = len(collected) / duration if duration > 0 else 0
+    print_retrieval_stats(retrieval_stats)
+    print("--- Generation ---")
+    print(f"Tokens (chunks):  {len(collected)}  |  Speed: {tok_per_s:.1f} tok/s")
+    if vram_before is not None and vram_after is not None:
+        print(f"VRAM:             {vram_before:.0f} MB -> {vram_after:.0f} MB / {vram_total:.0f} MB")
+    # END PERF -----------------------------------------------------------
 
 
     # print(f"\n=== Retrieved {len(docs)} docs ===")
